@@ -1,0 +1,11 @@
+<div>
+  <h3>Select Task To Run</h3>
+  </br>
+  <select ng-model='selectedTask' ng-options="t as t.task for t in TaskList">
+  </select>
+
+  </br>
+  </br>
+  </br>
+  <a ng-href="#{{selectedTask.url}}">Run Selected Task</a>
+</div>

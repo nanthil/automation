@@ -1,0 +1,28 @@
+<div>
+  <h3>Bot will be selected based on file input</h3>
+  <p>Select Input File</p>
+  <input id="exclude-file" type="file" file-model="botExcludeFile" />
+  </br>
+  </br>
+  </br>
+  <button ng-click="UploadFile()">Run Selected Task</button>
+  </br>
+  </br>
+  <b ng-show="duplicates.length > 0">Action will not update (duplicate records):</b>
+  <p ng-repeat="record in duplicates">{{record}}</p>
+  <b ng-show="jobIdToUpdate.length > 0">Action will update:</b>
+  <p ng-repeat="id in jobIdToUpdate">{{id}}</p>
+</div>
+<div ng-show="showBotList">
+  <p>You must select which bots to run manually</p>
+  <p><b>Client Name</b></p>
+  <div ng-repeat="client in clientList">
+
+
+    <b>{{client.name}}</b>
+    <select value="Please select bot from list" ng-model='selectedBot' ng-options="b as b.name for b in listOfBots" |>
+    </select>
+  </div>
+</div>
+
+<h3>{{verifyBotSelection}}</h3>

@@ -1,0 +1,30 @@
+<html ng-app="serviceApp">
+
+<head>
+</head>
+
+<body>
+	<ng-view></ng-view>
+	<!-- CORE ANGULAR -->
+	<script src="./node_modules/angular/angular.js"></script>
+	<script src="./node_modules/angular-route/angular-route.js"></script>
+	<script src="./node_modules/angular/angular-file-model.js"></script>
+	<script src="./node_modules/jquery/dist/jquery.js"></script>
+
+
+	<!--APP FILES-->
+	<script src="./js/app.js"></script>
+	<script src="./js/ppqa/ppqaCtrl.js"></script>
+	<script src="./js/Home/homeCtrl.js"></script>
+	<script src="./js/Bots/PickBot/pickBotCtrl.js"></script>
+
+	<!--SERVICES-->
+	<script src="./js/services/sqlCon.js"></script>
+	<script src="./js/services/EmailService.js"></script>
+	<script src="./js/services/CreateServiceNowRequest.js"></script>
+	<script src="./js/services/xml2jsonService.js"></script>
+
+	<script src="./js/services/excelDoc2json.js"></script>
+</body>
+
+</html>

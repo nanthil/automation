@@ -1,0 +1,20 @@
+{
+  "name": "nw-app",
+  "version": "1.0.0",
+  "description": "automate morning tasks",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "window": {
+    "toolbar": false,
+    "width": 800,
+    "height": 500,
+	"toolbar": true
+  },
+  "license": "ISC",
+  "dependencies": {
+    "pretty-bytes": "^1.0.2"
+  }
+}

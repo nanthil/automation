@@ -1,0 +1,149 @@
+serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
+  //\\dcofeedsvc01\Kapow Katalyst\Resources\Project\Library\HEC_AANP_FIND.robot
+  //conversion stuff
+  var botJson;
+  var excludeJson;
+  var fs = require('fs');
+  var listOfBotsArr = [];
+  var listOfBotsObj = [];
+  var dcofeed = '//dcofeedsvc01/Kapow Katalyst/Resources/Project/Library/'
+  $scope.listOfBots = 'no bots';
+  $scope.verifyBotSelection = 'No file selected';
+  $scope.showBotList = false;
+  $scope.clientList = [];
+  //upload the file and see contents
+  $scope.UploadFile = function() {
+
+    $scope.jobIdToUpdate = [];
+    $scope.duplicates = [];
+    var fileName = document.getElementById('exclude-file');
+    var aapa = 'AAPA';
+    var aanp = 'AANP';
+    var botPath = '';
+    convertInputFile(fileName.value);
+    console.log(excludeJson[0]);
+    getListOfBots(dcofeed);
+    $scope.botName = '';
+    $scope.clientList = createClientList(aapa, aanp);
+
+    //set aapa / aanp
+    if (excludeJson[1].name.indexOf(aapa) > -1) {
+      $scope.botName = aapa;
+      botPath = 'HEC_AAPA_FIND.robot';
+    } else if (excludeJson[1].name.indexOf(aanp) > -1) {
+      $scope.botName = aanp;
+      botPath = 'HEC_AANP_FIND.robot';
+    }
+    updateUIWithAAChanges($scope.botName, botPath);
+
+  }
+
+  function updateUIWithAAChanges(botName, botPath) {
+
+    var path = dcofeed + botPath;
+    xml2json.Convert(path, function(json) {
+      //manipulate data
+      var excludeHecJobId = getObjects(json.object.property, '_', 'Exclude HeC Job ID');
+      var list = excludeHecJobId[0][1].property[0].object;
+
+      var jobIds = [];
+      for (var i = 0; i < list.length; i++) {
+        var jobId = parseInt(list[i].property[1].property[0]._);
+        jobIds.push(jobId);
+      }
+      jobIds.sort(sortNumber);
+
+      //prompt user
+      $scope.verifyBotSelection = 'Would you like to update: ' + botName + '?';
+      for (var e = 0; e < excludeJson[1].data.length; e++) {
+        var jobIdToExclude = parseInt(excludeJson[1].data[e][0]);
+        for (var i = 0; i < jobIds.length; i++) {
+          var jobId = jobIds[i];
+          //skip thisJobIdToExclude loop if record exists already
+          if (jobIdToExclude === jobId) {
+            console.log(jobIdToExclude + ' dont add this lolo');
+            $scope.duplicates.push(jobIdToExclude);
+            break;
+          } else if (jobIdToExclude < jobId) {
+            $scope.jobIdToUpdate.push(jobIdToExclude);
+            console.log(jobIdToExclude + 'add this');
+            break;
+          }
+        }
+      }
+      //$scope.apply();
+    });
+  }
+  function recordObj(name, jobNum, clientId, contract, refId) {
+    this.name = name;
+    this.jobNum = jobNum;
+    this.clientId = clientId;
+    this.contract = contract;
+    this.refId = refId;
+  }
+  //searches through nested json to return parent object
+  function getObjects(obj, key, val, previousObj) {
+    var objects = [];
+    for (var i in obj) {
+
+      if (!obj.hasOwnProperty(i)) continue;
+
+      if (typeof obj[i] == 'object') {
+        previousObj = obj;
+        objects = objects.concat(getObjects(obj[i], key, val, previousObj));
+      } else if (i == key && obj[key] == val) {
+        objects.push(previousObj);
+        break;
+      }
+    }
+    return objects;
+  }
+  //get list of bots from directory
+  function getListOfBots(dir) {
+    fs.readdir(dir, function(err, files) {
+      listOfBotsArr = files;
+      $scope.showBotList = true;
+      //convert to object for consumption of angular options
+      for (var i = 0; i < listOfBotsArr.length; i++) {
+        if (!(listOfBotsArr[i].indexOf('.robot~') > -1) && !(listOfBotsArr[i].indexOf('.model~') > -1)) {
+          listOfBotsObj.push({
+            name: listOfBotsArr[i]
+          });
+          $scope.listOfBots = listOfBotsObj;
+          $scope.$apply();
+        }
+      }
+    });
+  }
+
+  //manual sort function()
+  //usage arrayName.sort(functioncall);
+  function sortNumber(a, b) {
+    return a - b;
+  }
+
+  function createClientList(aapa, aanp) {
+    var clientListObj = [];
+    if (excludeJson[0].data.length > 1) {
+      for (var i = 1; i < excludeJson[0].data.length; i++) {
+        var client = excludeJson[0].data[i];
+        //not a real record if client.length === 0
+        if (client.length !== 0) {
+          if (excludeJson[1].name.indexOf(aapa) > -1) {
+            clientListObj.push(new recordObj(client[0], client[1], client[2], client[3], client[4]));
+          } else if (excludeJson[1].name.indexOf(aanp) > -1) {
+            clientListObj.push(new recordObj(client[0], client[2], client[1], client[4], client[3]));
+          }
+
+        }
+      }
+    }
+    console.log(clientListObj);
+    return clientListObj;
+  }
+
+  function convertInputFile(fileName) {
+    excludeJson = excel2json.Convert(fileName);
+  }
+
+});
