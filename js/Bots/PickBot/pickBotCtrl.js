@@ -53,9 +53,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       var bot = $scope.selectedBots[b];
 
       for (var client in bot) {
-        console.log(bot);
         if (bot.hasOwnProperty(client)) {
-          console.log('ding');
           listOfBotsToBeChanged.push(bot[client].name);
         }
       }
@@ -94,12 +92,10 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
           var jobId = jobIds[i];
           //skip thisJobIdToExclude loop if record exists already
           if (jobIdToExclude === jobId) {
-            console.log(jobIdToExclude + ' dont add this lolo');
             $scope.duplicates.push(jobIdToExclude);
             break;
           } else if (jobIdToExclude < jobId) {
             $scope.jobIdToUpdate.push(jobIdToExclude);
-            console.log(jobIdToExclude + 'add this');
             break;
           }
         }
