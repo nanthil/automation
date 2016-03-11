@@ -6,11 +6,14 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   var fs = require('fs');
   var listOfBotsArr = [];
   var listOfBotsObj = [];
+
+  //<<-------TODO-------->>
   //add other 2 paths
   //this is path bots
   var dcofeed = '//dcofeedsvc01/Kapow Katalyst/Resources/Project/Library/'
     //add path feeds
     //add path jobTarget
+
   $scope.listOfBots = 'no bots';
   $scope.verifyBotSelection = 'No file selected';
   $scope.showBotList = false;
@@ -18,7 +21,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   $scope.clientList = [];
   //upload the file and see contents
   $scope.UploadFile = function() {
-
     $scope.jobIdToUpdate = [];
     $scope.duplicates = [];
     var fileName = document.getElementById('exclude-file');
@@ -32,7 +34,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     //will be set to either aapa or aanp
     $scope.botName = '';
     $scope.clientList = createClientList(aapa, aanp);
-
     //set aapa / aanp
     if (excludeJson[1].name.indexOf(aapa) > -1) {
       $scope.botName = aapa;
@@ -42,7 +43,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       botPath = 'HEC_AANP_FIND.robot';
     }
     updateUIWithAAChanges($scope.botName, botPath);
-
   }
   $scope.verifyBotSelection = function() {
     var message = 'Would you like to update: ' ;
@@ -109,6 +109,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   //these are client bots selected manually
   $scope.selectedBots = [];
   $scope.getSelectedBot = function(bot) {
+      //bot is a returned "this" object from html
       var thisBot = {};
       var shouldAddToList = true;
       thisBot[bot.client.name] = {
@@ -138,6 +139,8 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       $scope.showBotList = true;
       //convert to object for consumption of angular options
       for (var i = 0; i < listOfBotsArr.length; i++) {
+        //don't return any files that end in ~
+        //they are not relevant
         if (!(listOfBotsArr[i].indexOf('.robot~') > -1) && !(listOfBotsArr[i].indexOf('.model~') > -1)) {
           listOfBotsObj.push({
             name: listOfBotsArr[i]
@@ -148,8 +151,8 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       }
     });
   }
-
-  function recordObj(name, jobNum, clientId, contract, refId) {
+  //if there are client bots to update, this is their object
+  function clientBotObj(name, jobNum, clientId, contract, refId) {
     this.name = name;
     this.jobNum = jobNum;
     this.clientId = clientId;
@@ -160,9 +163,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   function getObjects(obj, key, val, previousObj) {
     var objects = [];
     for (var i in obj) {
-
       if (!obj.hasOwnProperty(i)) continue;
-
       if (typeof obj[i] == 'object') {
         previousObj = obj;
         objects = objects.concat(getObjects(obj[i], key, val, previousObj));
@@ -173,25 +174,24 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     }
     return objects;
   }
-
-
   //manual sort function()
   //usage arrayName.sort(functioncall);
   function sortNumber(a, b) {
     return a - b;
   }
-
+  //creates list of client bots, if any
   function createClientList(aapa, aanp) {
     var clientListObj = [];
+    //skip over column names
     if (excludeJson[0].data.length > 1) {
       for (var i = 1; i < excludeJson[0].data.length; i++) {
         var client = excludeJson[0].data[i];
         //not a real record if client.length === 0
         if (client.length !== 0) {
           if (excludeJson[1].name.indexOf(aapa) > -1) {
-            clientListObj.push(new recordObj(client[0], client[1], client[2], client[3], client[4]));
+            clientListObj.push(new clientBotObj(client[0], client[1], client[2], client[3], client[4]));
           } else if (excludeJson[1].name.indexOf(aanp) > -1) {
-            clientListObj.push(new recordObj(client[0], client[2], client[1], client[4], client[3]));
+            clientListObj.push(new clientBotObj(client[0], client[2], client[1], client[4], client[3]));
           }
 
         }
