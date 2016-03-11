@@ -9,8 +9,8 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   //add other 2 paths
   //this is path bots
   var dcofeed = '//dcofeedsvc01/Kapow Katalyst/Resources/Project/Library/'
-  //add path feeds
-  //add path jobTarget
+    //add path feeds
+    //add path jobTarget
   $scope.listOfBots = 'no bots';
   $scope.verifyBotSelection = 'No file selected';
   $scope.showBotList = false;
@@ -78,6 +78,49 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       //$scope.apply();
     });
   }
+  //these are client bots selected manually
+  $scope.selectedBots = [];
+  $scope.getSelectedBot = function(bot) {
+    var thisBot = {};
+    var shouldAddToList = true;
+    thisBot[bot.client.name] = {
+      name: bot.client.undefined.name
+    };
+    //if array is empty, push first record
+    if ($scope.selectedBots.length === 0) {
+      $scope.selectedBots.push(thisBot);
+    } else {
+      for (var i = 0; i < $scope.selectedBots.length; i++) {
+        //replace old value, if object already exists in array
+        if ($scope.selectedBots[i].hasOwnProperty(bot.client.name)) {
+          shouldAddToList = false;
+          $scope.selectedBots[i] = thisBot;
+        }
+      }
+      //if object does not exist in array, add this bot to the array
+      if (shouldAddToList) {
+        $scope.selectedBots.push(thisBot);
+      }
+    }
+  }
+  //get list of bots from directory
+  function getListOfBots(dir) {
+    fs.readdir(dir, function(err, files) {
+      listOfBotsArr = files;
+      $scope.showBotList = true;
+      //convert to object for consumption of angular options
+      for (var i = 0; i < listOfBotsArr.length; i++) {
+        if (!(listOfBotsArr[i].indexOf('.robot~') > -1) && !(listOfBotsArr[i].indexOf('.model~') > -1)) {
+          listOfBotsObj.push({
+            name: listOfBotsArr[i]
+          });
+          $scope.listOfBots = listOfBotsObj;
+          $scope.$apply();
+        }
+      }
+    });
+  }
+
   function recordObj(name, jobNum, clientId, contract, refId) {
     this.name = name;
     this.jobNum = jobNum;
@@ -102,23 +145,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     }
     return objects;
   }
-  //get list of bots from directory
-  function getListOfBots(dir) {
-    fs.readdir(dir, function(err, files) {
-      listOfBotsArr = files;
-      $scope.showBotList = true;
-      //convert to object for consumption of angular options
-      for (var i = 0; i < listOfBotsArr.length; i++) {
-        if (!(listOfBotsArr[i].indexOf('.robot~') > -1) && !(listOfBotsArr[i].indexOf('.model~') > -1)) {
-          listOfBotsObj.push({
-            name: listOfBotsArr[i]
-          });
-          $scope.listOfBots = listOfBotsObj;
-          $scope.$apply();
-        }
-      }
-    });
-  }
+
 
   //manual sort function()
   //usage arrayName.sort(functioncall);
