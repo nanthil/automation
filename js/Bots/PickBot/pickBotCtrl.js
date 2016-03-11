@@ -28,8 +28,8 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     var aanp = 'AANP';
     var botPath = '';
     var listOfBotsToBeChanged = [];
+    //TODO save off the file after it's converted
     convertInputFile(fileName.value);
-    console.log(excludeJson[0]);
     getListOfBots(dcofeed);
     //will be set to either aapa or aanp
     $scope.botName = '';
@@ -44,6 +44,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     }
     updateUIWithAAChanges($scope.botName, botPath);
   }
+  //TODO add $scope.clientList;
   $scope.verifyBotSelection = function() {
     var message = 'Would you like to update: ' ;
     listOfBotsToBeChanged = [];
@@ -197,7 +198,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
         }
       }
     }
-    console.log(clientListObj);
     return clientListObj;
   }
 
