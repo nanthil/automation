@@ -14,6 +14,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   $scope.listOfBots = 'no bots';
   $scope.verifyBotSelection = 'No file selected';
   $scope.showBotList = false;
+  $scope.showUserVerifyBotSelectionMessage = false;
   $scope.clientList = [];
   //upload the file and see contents
   $scope.UploadFile = function() {
@@ -24,9 +25,11 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     var aapa = 'AAPA';
     var aanp = 'AANP';
     var botPath = '';
+    var listOfBotsToBeChanged = [];
     convertInputFile(fileName.value);
     console.log(excludeJson[0]);
     getListOfBots(dcofeed);
+    //will be set to either aapa or aanp
     $scope.botName = '';
     $scope.clientList = createClientList(aapa, aanp);
 
@@ -41,7 +44,34 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     updateUIWithAAChanges($scope.botName, botPath);
 
   }
+  $scope.verifyBotSelection = function() {
+    var message = 'Would you like to update: ' ;
+    listOfBotsToBeChanged = [];
+    listOfBotsToBeChanged.push($scope.botName);
+    for (var b = 0; b < $scope.selectedBots.length; b++) {
+      var bot = $scope.selectedBots[b];
 
+      for (var client in bot) {
+        console.log(bot);
+        if (bot.hasOwnProperty(client)) {
+          console.log('ding');
+          listOfBotsToBeChanged.push(bot[client].name);
+        }
+      }
+    }
+    for(var name in listOfBotsToBeChanged){
+      if(listOfBotsToBeChanged[name] === listOfBotsToBeChanged[listOfBotsToBeChanged.length - 1]){
+
+        message = message + listOfBotsToBeChanged[name] + '?';
+      } else{
+        message = message + listOfBotsToBeChanged[name] + ', ';
+      }
+    }
+    $scope.userVerifyBotSelectionMessage = message;
+    $scope.showUserVerifyBotSelectionMessage = true;
+  }
+
+  //shows the user which changes he would like to make.
   function updateUIWithAAChanges(botName, botPath) {
 
     var path = dcofeed + botPath;
@@ -57,8 +87,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       }
       jobIds.sort(sortNumber);
 
-      //prompt user
-      $scope.verifyBotSelection = 'Would you like to update: ' + botName + '?';
       for (var e = 0; e < excludeJson[1].data.length; e++) {
         var jobIdToExclude = parseInt(excludeJson[1].data[e][0]);
         for (var i = 0; i < jobIds.length; i++) {
@@ -81,29 +109,29 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   //these are client bots selected manually
   $scope.selectedBots = [];
   $scope.getSelectedBot = function(bot) {
-    var thisBot = {};
-    var shouldAddToList = true;
-    thisBot[bot.client.name] = {
-      name: bot.client.undefined.name
-    };
-    //if array is empty, push first record
-    if ($scope.selectedBots.length === 0) {
-      $scope.selectedBots.push(thisBot);
-    } else {
-      for (var i = 0; i < $scope.selectedBots.length; i++) {
-        //replace old value, if object already exists in array
-        if ($scope.selectedBots[i].hasOwnProperty(bot.client.name)) {
-          shouldAddToList = false;
-          $scope.selectedBots[i] = thisBot;
+      var thisBot = {};
+      var shouldAddToList = true;
+      thisBot[bot.client.name] = {
+        name: bot.client.undefined.name
+      };
+      //if array is empty, push first record
+      if ($scope.selectedBots.length === 0) {
+        $scope.selectedBots.push(thisBot);
+      } else {
+        for (var i = 0; i < $scope.selectedBots.length; i++) {
+          //replace old value, if object already exists in array
+          if ($scope.selectedBots[i].hasOwnProperty(bot.client.name)) {
+            shouldAddToList = false;
+            $scope.selectedBots[i] = thisBot;
+          }
+        }
+        //if object does not exist in array, add this bot to the array
+        if (shouldAddToList) {
+          $scope.selectedBots.push(thisBot);
         }
       }
-      //if object does not exist in array, add this bot to the array
-      if (shouldAddToList) {
-        $scope.selectedBots.push(thisBot);
-      }
     }
-  }
-  //get list of bots from directory
+    //get list of bots from directory
   function getListOfBots(dir) {
     fs.readdir(dir, function(err, files) {
       listOfBotsArr = files;

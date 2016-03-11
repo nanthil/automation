@@ -1,29 +1,39 @@
-<div>
-  <h3>Bot will be selected based on file input</h3>
-  <p>Select Input File</p>
-  <input id="exclude-file" type="file" file-model="botExcludeFile" />
-  </br>
-  </br>
-  </br>
-  <button ng-click="UploadFile()">Run Selected Task</button>
-  </br>
-  </br>
-  <b ng-show="duplicates.length > 0">Action will not update (duplicate records):</b>
-  <p ng-repeat="record in duplicates">{{record}}</p>
-  <b ng-show="jobIdToUpdate.length > 0">Action will update:</b>
-  <p ng-repeat="id in jobIdToUpdate">{{id}}</p>
-</div>
-<div ng-show="showBotList">
-  <p>You must select which bots to run manually</p>
-  <p><b>Client Name</b></p>
-  <div ng-repeat="client in clientList">
-
-
-    <b>{{client.name}}</b>
-    <select value="Please select bot from list" ng-model="client[name]" ng-options="b as b.name for b in listOfBots" ng-change="getSelectedBot(this)" |>
-    </select>
+<div ng-show="!showUserVerifyBotSelectionMessage">
+  <div>
+    <h3>Bot will be selected based on file input</h3>
+    <p>Select Input File</p>
+    <input id="exclude-file" type="file" file-model="botExcludeFile" />
+    </br>
+    </br>
+    </br>
+    <button ng-click="UploadFile()">UploadFile</button>
+    </br>
+    </br>
+    <div id="things-to-update">
+      <div id="duplicates">
+        <b ng-show="duplicates.length > 0">Action will not update (duplicate records):</b>
+        <p ng-repeat="record in duplicates">{{record}}</p>
+      </div>
+      <div id="job-id-to-update">
+        <b ng-show="jobIdToUpdate.length > 0">Action will update:</b>
+        <p ng-repeat="id in jobIdToUpdate">{{id}}</p>
+      </div>
+    </div>
   </div>
-  <button ng-click="">Select Bots</button>
-</div>
+  <div ng-show="showBotList">
+    <p>You must select which bots to run manually</p>
+    <p><b>Client Name</b></p>
+    <div ng-repeat="client in clientList">
 
-<h3>{{verifyBotSelection}}</h3>
+
+      <b>{{client.name}}</b>
+      <select value="Please select bot from list" ng-model="client[name]" ng-options="b as b.name for b in listOfBots" ng-change="getSelectedBot(this)" |>
+      </select>
+    </div>
+    <button ng-click="verifyBotSelection()">Select Bots</button>
+  </div>
+</div>
+<div ng-show="showUserVerifyBotSelectionMessage">
+  <h3>{{userVerifyBotSelectionMessage}}</h3>
+  <button ng-click="console.log('blah')">Blah</button>
+</div>
