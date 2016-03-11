@@ -6,7 +6,11 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
   var fs = require('fs');
   var listOfBotsArr = [];
   var listOfBotsObj = [];
+  //add other 2 paths
+  //this is path bots
   var dcofeed = '//dcofeedsvc01/Kapow Katalyst/Resources/Project/Library/'
+  //add path feeds
+  //add path jobTarget
   $scope.listOfBots = 'no bots';
   $scope.verifyBotSelection = 'No file selected';
   $scope.showBotList = false;

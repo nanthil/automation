@@ -20,9 +20,10 @@
 
 
     <b>{{client.name}}</b>
-    <select value="Please select bot from list" ng-model='selectedBot' ng-options="b as b.name for b in listOfBots" |>
+    <select value="Please select bot from list" ng-model='b.name' ng-options="b as b.name for b in listOfBots" |>
     </select>
   </div>
+  <button ng-click="(getBotSelection())">Select Bots</button>
 </div>
 
 <h3>{{verifyBotSelection}}</h3>
