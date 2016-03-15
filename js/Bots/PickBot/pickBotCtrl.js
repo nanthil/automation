@@ -74,13 +74,15 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
 
 
   $scope.makeChangesAndSaveToFile = function() {
-    //aapa, aanp section
+
     var addNewJob = true,
       arrayOfJobObjects = [],
       arrayOfRefIds = [],
       noDuplicates = true;
     var jobIdObject = excludedHecJobIds[0][1].property[0].object;
     var clonedObjetOfKapowExclusion = (JSON.parse(JSON.stringify(jobIdObject[0])));
+
+    //for each job that needs changes
     for (var job = 0; job < $scope.jobIdToUpdate.length; job++) {
       //reset for each job
       addNewJob = true;
@@ -103,7 +105,7 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
       //readd this to file, save file
     }
 
-    //client bot selection
+    //for each client bot that needs changes
     for (var bot = 0; bot < $scope.clientList.length; bot++) {
       var newRefId = $scope.clientList[bot].refId.toString();
       xml2json.ConvertToJson($scope.clientList[bot].path, function(json) {
