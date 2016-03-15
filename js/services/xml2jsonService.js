@@ -19,8 +19,8 @@ serviceApp.factory('xml2json', function() {
     },
     ConvertToXml: function(objectToConvert) {
       var js2xml = require('js2xmlparser');
-      return js2xml('blah', objectToConvert);
-
+      var we = js2xml('blah', objectToConvert);
+      return we;
     }
   }
 });

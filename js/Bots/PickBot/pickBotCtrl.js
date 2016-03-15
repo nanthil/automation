@@ -1,38 +1,26 @@
 serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn) {
   //\\dcofeedsvc01\Kapow Katalyst\Resources\Project\Library\HEC_AANP_FIND.robot
   //conversion stuff
-  var botJson;
-  var excludeJson;
-  var excludedHecJobIds;
+  var botJson, excludeJson, excludedHecJobIds, listOfBotsArr = [],
+    listOfBotsObj = [];
   var fs = require('fs');
-  var listOfBotsArr = [];
-  var listOfBotsObj = [];
   //<<-------TODO-------->>
   //add other 2 paths
   //this is path bots
   var dcofeed = '//dcofeedsvc01/Kapow Katalyst/Resources/Project/Library/'
-    //add path feeds
-    //add path jobTarget
 
   $scope.listOfBots = 'no bots';
   $scope.verifyBotSelection = 'No file selected';
   $scope.showBotList = false;
   $scope.showUserVerifyBotSelectionMessage = false;
-  $scope.clientList = [];
-  //TODO TODO TODO
-  //keep track of job id's and duplicates
-  //don't save duplicates, save jobIdToUpdate
-  //TODO TODO TODO
-  $scope.jobIdToUpdate = [];
-  $scope.duplicates = [];
-
+  $scope.clientList = [], $scope.jobIdToUpdate = [], $scope.duplicates = [];
   //upload the file and see contents
   $scope.UploadFile = function() {
     var fileName = document.getElementById('exclude-file');
-    var aapa = 'AAPA';
-    var aanp = 'AANP';
-    var botPath = '';
-    var listOfBotsToBeChanged = [];
+    var aapa = 'AAPA',
+      aanp = 'AANP',
+      botPath = '',
+      listOfBotsToBeChanged = [];
 
     excludeJson = excel2json.Convert(fileName.value);
     getListOfBots(dcofeed);
@@ -55,12 +43,19 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
   $scope.verifyBotSelection = function() {
     var message = 'Would you like to update: ';
     listOfBotsToBeChanged = [];
+    //aapa, aanp
     listOfBotsToBeChanged.push($scope.botName);
     for (var b = 0; b < $scope.selectedBots.length; b++) {
       var bot = $scope.selectedBots[b];
-
       for (var client in bot) {
+        console.log(bot);
         if (bot.hasOwnProperty(client)) {
+          for (var clientBotObject in $scope.clientList) {
+            if ($scope.clientList[clientBotObject].name === client) {
+              $scope.clientList[clientBotObject].path = dcofeed + bot[client].name;
+            }
+          }
+          console.log($scope.clientList);
           listOfBotsToBeChanged.push(bot[client].name);
         }
       }
@@ -77,58 +72,72 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
     $scope.showUserVerifyBotSelectionMessage = true;
   }
 
-  //TODO
-  $scope.makeChangesAndSaveToFile = function() {
-    //list of bots to be changed = [] of filenames
-    //excludeJSON = {list of all the current excluded stuff in the xml source file}
-    //listOfBots = {name: nameoffile}
-    //$scope.botName
-    var clonedObjetOfKapowExclusion = (JSON.parse(JSON.stringify( /*clone any old object from excludeJSON*/ )));
 
+  $scope.makeChangesAndSaveToFile = function() {
+    //aapa, aanp section
+    var addNewJob = true,
+      arrayOfJobObjects = [],
+      arrayOfRefIds = [],
+      noDuplicates = true;
+    var jobIdObject = excludedHecJobIds[0][1].property[0].object;
+    var clonedObjetOfKapowExclusion = (JSON.parse(JSON.stringify(jobIdObject[0])));
     for (var job = 0; job < $scope.jobIdToUpdate.length; job++) {
+      //reset for each job
+      addNewJob = true;
       var newJob = $scope.jobIdToUpdate[job];
-      for (var oj = 0; oj < excludedHecJobIds.length; oj++) {
-        var oldJob = excludedHecJobIds[oj];
-        if (newJob === thing /*oldJob.property.property*/ ) {
-          var temp = clonedObjetOfKapowExclusion;
-          //change value of temp.whatever to be 'this.jobid'
-          //insert temp in number order
+      for (var oj = 0; oj < jobIdObject.length; oj++) {
+        var oldJob = parseInt(jobIdObject[oj].property[1].property[0]._);
+        arrayOfJobObjects.push(jobIdObject[oj]);
+        //skip the following if there are duplicates
+        if (newJob === oldJob) {
           break;
-        } else if (jobIdToExclude < jobId) {
+        } else if (newJob < oldJob && addNewJob) {
+          //add job
+          addNewJob = false;
           var temp = clonedObjetOfKapowExclusion;
-          //change value of temp.whatever to be 'this.jobid'
-          //insert temp in number order
-          break;
+          temp.property[1].property[0]._ = newJob.toString();
+          arrayOfJobObjects.push(temp);
         }
       }
+      excludedHecJobIds[0][1].property[0].object = arrayOfJobObjects;
+      //readd this to file, save file
     }
-    //var blah = jsonObj.ConvertToXml(data);
-    //when above loop is complete, convert to xml, write to files
 
-    for (var bot = 0; bot < clientList.length; bot++) {
-      var path = dcofeedsvc01 + clientList[bot];
-      var fileToBeChanged = excel2json.Convert(path);
-      var refIds = getObjects(fileToBeChanged, '_' /*obj, key, val, parent*/ );
-      var clonedObjectOfKapowRefId = (JSON.parse(JSON.stringify( /*any old ref ID object: i.e. refIds[0]*/ )));
-      for (var thing in clonedObjectOfKapowRefId /*repeat for all refIds, makes sure to put object in order*/ ) {
-        var temp = clonedObjectOfKapowRefId;
-        //temp.whatever.refID = refIdFromXcelDoc
-        //put that object in the old object in order
-      }
-      //when loop is done, convert back to xml, write to file
+    //client bot selection
+    for (var bot = 0; bot < $scope.clientList.length; bot++) {
+      var newRefId = $scope.clientList[bot].refId.toString();
+      xml2json.ConvertToJson($scope.clientList[bot].path, function(json) {
+        var refIds = getObjects(json, '_', 'Test Job Title, Tagline and Description');
+        var refIdList = refIds[0][1].property[0].object;
+        console.log(refIdList);
+        var clonedObjectOfKapowRefId = (JSON.parse(JSON.stringify(refIdList[0])));
+
+        for (var id in refIdList) {
+          var oldRefId = refIdList[id].property[1].property[0]._.toString();
+          if (newRefId === oldRefId) {
+            noDuplicates = false;
+          }
+        }
+        console.log(noDuplicates);
+        if (noDuplicates) {
+          var temp = clonedObjectOfKapowRefId;
+          temp.property[1].property[0]._ = newRefId;
+          refIdList.push(temp);
+        }
+        //readd refIdList to File, save to file
+      });
     }
   }
 
   //shows the user which changes he would like to make.
   function updateUIWithAAChanges(botName, botPath) {
-
-    $scope.jobIdToUpdate = [];
-    $scope.duplicates = [];
+    $scope.jobIdToUpdate = [], $scope.duplicates = [];
     var path = dcofeed + botPath;
     //pass callback function that manipulates resulting json
     xml2json.ConvertToJson(path, function(json) {
       //get deep nested object by object name
       excludedHecJobIds = getObjects(json.object.property, '_', 'Exclude HeC Job ID');
+
       var list = excludedHecJobIds[0][1].property[0].object;
       var jobIds = [];
       for (var i = 0; i < list.length; i++) {
@@ -151,12 +160,10 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
           }
         }
       }
-      //$scope.apply();
+      $scope.apply();
     });
   }
-
-
-  //these are client bots selected manually
+  //list of client bots selected manually
   $scope.selectedBots = [];
   $scope.getSelectedBot = function(bot) {
       //bot is a returned "this" object from html
@@ -202,12 +209,13 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
     });
   }
   //if there are client bots to update, this is their object
-  function clientBotObj(name, jobNum, clientId, contract, refId) {
+  function clientBotObj(name, clientId, jobNum, refId, contract) {
     this.name = name;
-    this.jobNum = jobNum;
     this.clientId = clientId;
-    this.contract = contract;
+    this.jobNum = jobNum;
     this.refId = refId;
+    this.contract = contract;
+    this.path = '';
   }
   //searches through nested json to return parent object
   function getObjects(obj, key, val, previousObj) {
@@ -239,9 +247,10 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn)
         //not a real record if client.length === 0
         if (client.length !== 0) {
           if (excludeJson[1].name.indexOf(aapa) > -1) {
+
             clientListObj.push(new clientBotObj(client[0], client[1], client[2], client[3], client[4]));
           } else if (excludeJson[1].name.indexOf(aanp) > -1) {
-            clientListObj.push(new clientBotObj(client[0], client[2], client[1], client[4], client[3]));
+            clientListObj.push(new clientBotObj(client[0], client[1], client[2], client[3], client[4]));
           }
 
         }
