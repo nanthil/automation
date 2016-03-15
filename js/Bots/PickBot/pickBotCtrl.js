@@ -80,13 +80,13 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
     //excludeJSON = {list of all the current excluded stuff in the xml source file}
     //listOfBots = {name: nameoffile}
     //$scope.botName
-    var changedFiles = [];
     var clonedObjetOfKapowExclusion = (JSON.parse(JSON.stringify( /*clone any old object from excludeJSON*/ )));
 
     for (var job = 0; job < $scope.jobIdToUpdate.length; job++) {
       var newJob = $scope.jobIdToUpdate[job];
       for (var oj = 0; oj < excludedHecJobIds.length; oj++) {
         var oldJob = excludedHecJobIds[oj];
+        
         if (newJob === /*oldJob.property.property*/ ) {
           var temp = clonedObjetOfKapowExclusion;
           //change value of temp.whatever to be 'this.jobid'
@@ -105,7 +105,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       var path = dcofeedsvc01 + clientList[bot];
       var fileToBeChanged = excel2json.Convert(path);
       var refIds = getObjects(fileToBeChanged, '_', /*obj, key, val, parent*/ );
-
       var clonedObjectOfKapowRefId = (JSON.parse(JSON.stringify( /*any old ref ID object: i.e. refIds[0]*/ )));
       for ( /*repeat for all refIds, makes sure to put object in order*/ ) {
         var temp = clonedObjectOfKapowRefId;
