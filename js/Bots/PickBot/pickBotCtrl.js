@@ -1,4 +1,4 @@
-serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
+serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json, svn) {
   //\\dcofeedsvc01\Kapow Katalyst\Resources\Project\Library\HEC_AANP_FIND.robot
   //conversion stuff
   var botJson;
@@ -86,7 +86,6 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       var newJob = $scope.jobIdToUpdate[job];
       for (var oj = 0; oj < excludedHecJobIds.length; oj++) {
         var oldJob = excludedHecJobIds[oj];
-        
         if (newJob === /*oldJob.property.property*/ ) {
           var temp = clonedObjetOfKapowExclusion;
           //change value of temp.whatever to be 'this.jobid'
@@ -100,7 +99,9 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
         }
       }
     }
+    //var blah = jsonObj.ConvertToXml(data);
     //when above loop is complete, convert to xml, write to files
+
     for (var bot = 0; bot < clientList.length; bot++) {
       var path = dcofeedsvc01 + clientList[bot];
       var fileToBeChanged = excel2json.Convert(path);
@@ -113,14 +114,13 @@ serviceApp.controller('pickBotCtrl', function($scope, xml2json, excel2json) {
       }
       //when loop is done, convert back to xml, write to file
     }
-
   }
 }
 //shows the user which changes he would like to make.
 function updateUIWithAAChanges(botName, botPath) {
 
   var path = dcofeed + botPath;
-  xml2json.Convert(path, function(json) {
+  xml2json.ConvertToJson(path, function(json) {
 
     //manipulate data
     excludedHecJobIds = getObjects(json.object.property, '_', 'Exclude HeC Job ID');
@@ -150,6 +150,7 @@ function updateUIWithAAChanges(botName, botPath) {
     //$scope.apply();
   });
 }
+
 
 //these are client bots selected manually
 $scope.selectedBots = []; $scope.getSelectedBot = function(bot) {
